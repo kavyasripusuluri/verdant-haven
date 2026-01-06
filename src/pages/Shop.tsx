@@ -14,6 +14,7 @@ interface ShopProps {
 export function Shop({ searchQuery }: ShopProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryFilter = searchParams.get('category') || 'all';
+  const specialFilter = searchParams.get('filter') || '';
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredPlants = useMemo(() => {
@@ -21,9 +22,12 @@ export function Shop({ searchQuery }: ShopProps) {
       const matchesSearch = plant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         plant.category.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || plant.category === categoryFilter;
-      return matchesSearch && matchesCategory;
+      const matchesSpecialFilter = !specialFilter || 
+        (specialFilter === 'beginner' && plant.beginnerFriendly) ||
+        (specialFilter === 'ayurvedic' && plant.isAyurvedic);
+      return matchesSearch && matchesCategory && matchesSpecialFilter;
     });
-  }, [searchQuery, categoryFilter]);
+  }, [searchQuery, categoryFilter, specialFilter]);
 
   const handleCategoryChange = (category: string) => {
     if (category === 'all') {
@@ -31,6 +35,12 @@ export function Shop({ searchQuery }: ShopProps) {
     } else {
       searchParams.set('category', category);
     }
+    searchParams.delete('filter'); // Clear special filter when changing category
+    setSearchParams(searchParams);
+  };
+
+  const clearSpecialFilter = () => {
+    searchParams.delete('filter');
     setSearchParams(searchParams);
   };
 
@@ -117,19 +127,43 @@ export function Shop({ searchQuery }: ShopProps) {
             </div>
           </div>
 
-          {/* Active Filter Badge */}
-          {categoryFilter !== 'all' && (
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-sm text-muted-foreground">Active filter:</span>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => handleCategoryChange('all')}
-                className="gap-1"
-              >
-                {categories.find(c => c.id === categoryFilter)?.name}
-                <X className="h-3 w-3" />
-              </Button>
+          {/* Active Filter Badges */}
+          {(categoryFilter !== 'all' || specialFilter) && (
+            <div className="flex items-center gap-2 mb-6 flex-wrap">
+              <span className="text-sm text-muted-foreground">Active filters:</span>
+              {categoryFilter !== 'all' && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleCategoryChange('all')}
+                  className="gap-1"
+                >
+                  {categories.find(c => c.id === categoryFilter)?.name}
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+              {specialFilter === 'beginner' && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={clearSpecialFilter}
+                  className="gap-1"
+                >
+                  🌱 Beginner Friendly
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+              {specialFilter === 'ayurvedic' && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={clearSpecialFilter}
+                  className="gap-1"
+                >
+                  🌿 Ayurvedic Plants
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
             </div>
           )}
 

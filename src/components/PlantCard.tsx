@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Eye } from 'lucide-react';
+import { ShoppingBag, Eye, ZoomIn, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Plant } from '@/data/plants';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
+import { ImageLightbox } from './ImageLightbox';
 
 interface PlantCardProps {
   plant: Plant;
@@ -13,6 +15,7 @@ interface PlantCardProps {
 export function PlantCard({ plant, index = 0 }: PlantCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -24,28 +27,60 @@ export function PlantCard({ plant, index = 0 }: PlantCardProps) {
     });
   };
 
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsLightboxOpen(true);
+  };
+
   return (
-    <div
-      className="group relative bg-card rounded-2xl shadow-soft overflow-hidden hover-lift animate-fade-up"
-      style={{ animationDelay: `${index * 100}ms` }}
-    >
-      {/* Image Container */}
-      <Link to={`/plant/${plant.id}`} className="block relative aspect-square overflow-hidden">
-        <img
-          src={plant.image}
-          alt={plant.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        
-        {/* Quick View Button */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Button variant="secondary" size="sm" className="shadow-card">
-            <Eye className="h-4 w-4 mr-2" />
-            View Details
-          </Button>
+    <>
+      <div
+        className="group relative bg-card rounded-2xl shadow-soft overflow-hidden hover-lift animate-fade-up"
+        style={{ animationDelay: `${index * 100}ms` }}
+      >
+        {/* Badges */}
+        {plant.isAyurvedic && (
+          <div className="absolute top-3 left-3 z-10 px-2 py-1 rounded-full bg-primary/90 text-primary-foreground text-xs font-medium flex items-center gap-1">
+            <Leaf className="h-3 w-3" />
+            Ayurvedic
+          </div>
+        )}
+        {plant.beginnerFriendly && !plant.isAyurvedic && (
+          <div className="absolute top-3 left-3 z-10 px-2 py-1 rounded-full bg-sage/90 text-foreground text-xs font-medium">
+            🌱 Beginner Friendly
+          </div>
+        )}
+
+        {/* Image Container */}
+        <div className="relative aspect-square overflow-hidden">
+          <img
+            src={plant.image}
+            alt={plant.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 cursor-pointer"
+            onClick={handleImageClick}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+          
+          {/* Action Buttons on Hover */}
+          <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              className="shadow-card"
+              onClick={handleImageClick}
+            >
+              <ZoomIn className="h-4 w-4 mr-2" />
+              Zoom
+            </Button>
+            <Button variant="secondary" size="sm" className="shadow-card" asChild>
+              <Link to={`/plant/${plant.id}`}>
+                <Eye className="h-4 w-4 mr-2" />
+                Details
+              </Link>
+            </Button>
+          </div>
         </div>
-      </Link>
 
       {/* Content */}
       <div className="p-4 md:p-5">
@@ -76,5 +111,13 @@ export function PlantCard({ plant, index = 0 }: PlantCardProps) {
         </div>
       </div>
     </div>
+
+    <ImageLightbox
+      isOpen={isLightboxOpen}
+      onClose={() => setIsLightboxOpen(false)}
+      imageSrc={plant.image}
+      imageAlt={plant.name}
+    />
+    </>
   );
 }
