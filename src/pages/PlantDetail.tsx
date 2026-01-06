@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Minus, Plus, ShoppingBag, Droplets, Sun, Ruler } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, ShoppingBag, Droplets, Sun, Ruler, Leaf, ZoomIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PlantCard } from '@/components/PlantCard';
 import { Footer } from '@/components/Footer';
+import { ImageLightbox } from '@/components/ImageLightbox';
 import { plants } from '@/data/plants';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +15,7 @@ export function PlantDetail() {
   const { addToCart } = useCart();
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const plant = plants.find((p) => p.id === id);
 
@@ -64,12 +66,34 @@ export function PlantDetail() {
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
             {/* Image Gallery */}
             <div className="animate-fade-up">
-              <div className="aspect-square rounded-3xl overflow-hidden bg-muted shadow-card">
+              <div 
+                className="relative aspect-square rounded-3xl overflow-hidden bg-muted shadow-card cursor-pointer group"
+                onClick={() => setIsLightboxOpen(true)}
+              >
                 <img
                   src={plant.image}
                   alt={plant.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
+                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors duration-300 flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-card/90 px-4 py-2 rounded-full flex items-center gap-2">
+                    <ZoomIn className="h-5 w-5" />
+                    <span className="font-medium">Click to zoom</span>
+                  </div>
+                </div>
+                
+                {/* Badges */}
+                {plant.isAyurvedic && (
+                  <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-primary/90 text-primary-foreground text-sm font-medium flex items-center gap-1.5">
+                    <Leaf className="h-4 w-4" />
+                    Ayurvedic Plant
+                  </div>
+                )}
+                {plant.beginnerFriendly && !plant.isAyurvedic && (
+                  <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-sage/90 text-foreground text-sm font-medium">
+                    🌱 Beginner Friendly
+                  </div>
+                )}
               </div>
             </div>
 
@@ -90,6 +114,19 @@ export function PlantDetail() {
               <p className="text-muted-foreground leading-relaxed">
                 {plant.description}
               </p>
+
+              {/* Medicinal Uses for Ayurvedic Plants */}
+              {plant.isAyurvedic && plant.medicinalUses && (
+                <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+                  <h3 className="font-serif font-medium text-foreground mb-2 flex items-center gap-2">
+                    <Leaf className="h-5 w-5 text-primary" />
+                    Ayurvedic & Medicinal Uses
+                  </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {plant.medicinalUses}
+                  </p>
+                </div>
+              )}
 
               {/* Care Info */}
               <div className="grid grid-cols-3 gap-4">
@@ -181,6 +218,13 @@ export function PlantDetail() {
       )}
 
       <Footer />
+
+      <ImageLightbox
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        imageSrc={plant.image}
+        imageAlt={plant.name}
+      />
     </main>
   );
 }

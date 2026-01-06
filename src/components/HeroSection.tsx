@@ -74,16 +74,26 @@ export function HeroSection() {
                 className="relative z-10 w-full h-full object-cover rounded-3xl shadow-hover"
               />
               
-              {/* Floating Badge */}
-              <div className="absolute -right-4 top-1/4 bg-card p-4 rounded-xl shadow-card animate-float z-20">
+              {/* Floating Badge - Best Seller */}
+              <Link 
+                to="/plant/1" 
+                className="absolute -right-4 top-1/4 bg-card p-4 rounded-xl shadow-card animate-float z-20 hover:shadow-hover transition-shadow duration-300 cursor-pointer group"
+              >
                 <p className="text-sm font-medium text-muted-foreground">Best Seller</p>
-                <p className="font-serif font-semibold text-foreground">Monstera</p>
-              </div>
+                <p className="font-serif font-semibold text-foreground group-hover:text-primary transition-colors">Monstera</p>
+                <p className="text-xs text-primary mt-1">Click to view →</p>
+              </Link>
               
-              <div className="absolute -left-4 bottom-1/4 bg-card p-4 rounded-xl shadow-card animate-float z-20" style={{ animationDelay: '1s' }}>
+              {/* Floating Badge - Beginner Friendly */}
+              <Link 
+                to="/shop?filter=beginner" 
+                className="absolute -left-4 bottom-1/4 bg-card p-4 rounded-xl shadow-card animate-float z-20 hover:shadow-hover transition-shadow duration-300 cursor-pointer group" 
+                style={{ animationDelay: '1s' }}
+              >
                 <p className="text-sm font-medium text-muted-foreground">Easy Care</p>
                 <p className="font-serif font-semibold text-primary">🌿 Beginner Friendly</p>
-              </div>
+                <p className="text-xs text-muted-foreground group-hover:text-primary transition-colors mt-1">View all →</p>
+              </Link>
             </div>
           </div>
         </div>
