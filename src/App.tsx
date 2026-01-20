@@ -1,39 +1,28 @@
-import { useState } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { CartProvider } from "@/context/CartContext";
-import { Navbar } from "@/components/Navbar";
-import { CartSlideOut } from "@/components/CartSlideOut";
-import Index from "./pages/Index";
-import Shop from "./pages/Shop";
-import PlantDetail from "./pages/PlantDetail";
-import NotFound from "./pages/NotFound";
+import { AppProvider, useApp } from "@/context/AppContext";
+import { LoginPage } from "@/components/LoginPage";
+import { Dashboard } from "@/pages/Dashboard";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+const AppContent = () => {
+  const { isLoggedIn } = useApp();
+  
+  return isLoggedIn ? <Dashboard /> : <LoginPage />;
+};
 
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <CartProvider>
+        <AppProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
-            <Navbar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-            <CartSlideOut />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/shop" element={<Shop searchQuery={searchQuery} />} />
-              <Route path="/plant/:id" element={<PlantDetail />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </CartProvider>
+          <AppContent />
+        </AppProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
